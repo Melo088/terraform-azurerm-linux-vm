@@ -241,8 +241,9 @@ terraform destroy
 Every physical name follows `{client}-{project}-{environment}-{type}-{key}`,
 lowercase, hyphen separated, at most 28 characters. Names are built once in
 `sample/locals.tf` and passed into the module, so a change to the convention
-touches a single file. A validation in `variables.tf` rejects anything that
-breaks the pattern.
+touches a single file. Two validations in `variables.tf` reject anything that
+breaks the pattern, one on the shape of the name and one that checks the name
+carries the same `client`, `project` and `environment` the tags declare.
 
 | Type | Abbreviation | Resulting name |
 | --- | --- | --- |
@@ -333,9 +334,10 @@ terraform init -backend=false
 terraform test
 ```
 
-Seven runs cover the produced resource set, the tags applied to every resource,
-and six validation paths including weak passwords, reserved administrator names,
-oversized names, incomplete tags and an empty subnet ID.
+Eight runs cover the produced resource set, the tags applied to every resource,
+and seven validation paths including weak passwords, reserved administrator
+names, oversized names, names outside the naming prefix, incomplete tags and an
+empty subnet ID.
 
 Static analysis mirrors the pipeline.
 

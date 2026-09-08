@@ -150,6 +150,17 @@ variable "virtual_machines" {
   validation {
     condition = alltrue([
       for key, config in var.virtual_machines :
+      alltrue([
+        for name in [config.name, config.network_interface_name, config.public_ip_name, config.os_disk_name] :
+        startswith(name, "${var.client}-${var.project}-${var.environment}-")
+      ])
+    ])
+    error_message = "Every resource name must start with the {client}-{project}-{environment} prefix, so names and tags always describe the same workload."
+  }
+
+  validation {
+    condition = alltrue([
+      for key, config in var.virtual_machines :
       can(regex("^[a-z_][a-z0-9_-]{0,31}$", config.admin_username)) && !contains(
         ["admin", "administrator", "root", "guest", "test", "user", "sys", "adm", "backup", "console", "owner", "server", "sql", "support", "video"],
         config.admin_username

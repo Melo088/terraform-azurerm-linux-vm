@@ -11,7 +11,9 @@
 crash.log
 crash.*.log
 
-# Saved plans, they may contain sensitive data
+# Saved plans, they may contain sensitive data in plain text
+tfplan
+tfplan.*
 *.tfplan
 *.tfplan.*
 plan.out

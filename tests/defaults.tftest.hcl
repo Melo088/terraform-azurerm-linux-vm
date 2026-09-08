@@ -228,3 +228,34 @@ run "rejects_an_empty_subnet_id" {
 
   expect_failures = [var.virtual_machines]
 }
+
+run "rejects_names_outside_the_governance_prefix" {
+  command = plan
+
+  providers = {
+    azurerm.project = azurerm.principal
+  }
+
+  variables {
+    virtual_machines = {
+      main = {
+        name                   = "other-workload-vm-main"
+        network_interface_name = "icesi-easyvm-dev-nic-main"
+        public_ip_name         = "icesi-easyvm-dev-pip-main"
+        os_disk_name           = "icesi-easyvm-dev-disk-main"
+        subnet_id              = "/subscriptions/id/subnet"
+        size                   = "Standard_B2ls_v2"
+        admin_username         = "azureops"
+
+        source_image_reference = {
+          publisher = "Canonical"
+          offer     = "ubuntu-24_04-lts"
+          sku       = "server"
+          version   = "latest"
+        }
+      }
+    }
+  }
+
+  expect_failures = [var.virtual_machines]
+}
