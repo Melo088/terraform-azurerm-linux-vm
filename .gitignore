@@ -1,0 +1,34 @@
+# Terraform working directories and plugin cache
+**/.terraform/*
+.terraform.tfstate.lock.info
+
+# State files, they may contain sensitive data and are never versioned
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Saved plans, they may contain sensitive data
+*.tfplan
+*.tfplan.*
+plan.out
+
+# Variable files that may carry secrets. terraform.tfvars of the example is
+# tracked on purpose because it holds no secret, see PC-IAC-016.
+*.auto.tfvars
+*.auto.tfvars.json
+secrets.tfvars
+!sample/terraform.tfvars
+
+# CLI configuration and credentials
+.terraformrc
+terraform.rc
+
+# Editor and operating system noise
+.idea/
+.vscode/
+*.swp
+.DS_Store

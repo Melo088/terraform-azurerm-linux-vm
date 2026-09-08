@@ -1,0 +1,87 @@
+# Static validation pipeline.
+name: terraform-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TERRAFORM_VERSION: 1.13.3
+
+jobs:
+  validate:
+    name: Format, validate and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive -diff
+
+      - name: Initialise the module
+        run: terraform init -backend=false -input=false
+
+      # A shared module that declares configuration_aliases cannot be validated
+      # standalone, Terraform reports the missing aliased provider. The test
+      # suite validates and plans the module against a mocked provider, and the
+      # example below validates it again as a child module.
+      - name: Run the test suite
+        run: terraform test -no-color
+
+      - name: Initialise the example
+        working-directory: sample
+        run: terraform init -backend=false -input=false
+
+      - name: Validate the example
+        working-directory: sample
+        run: terraform validate -no-color
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: latest
+
+      - name: Initialise TFLint plugins
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run TFLint
+        run: tflint --recursive --format compact
+
+  security:
+    name: Static security analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          quiet: true
+          soft_fail: false
